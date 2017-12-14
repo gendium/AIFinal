@@ -1,4 +1,23 @@
 # myTeam.py
+'''
+Author: Sean Egger, Alec Rulev
+Class: CSI-480-01
+Assignment: Final Project
+Due Date: 12/14/2017
+ 
+Description:
+A pacman ai capture the flag program
+ 
+Certification of Authenticity: 
+I certify that this is entirely my own work, except where I have given 
+fully-documented references to the work of others. I understand the definition 
+and consequences of plagiarism and acknowledge that the assessor of this 
+assignment may, for the purpose of assessing this assignment:
+- Reproduce this assignment and provide a copy to another member of academic
+- staff; and/or Communicate a copy of this assignment to a plagiarism checking
+- service (which may then retain a copy of this assignment on its database for
+- the purpose of future plagiarism checking)
+'''
 # ---------
 # Licensing Information:  You are free to use or extend these projects for
 # educational purposes provided that (1) you do not distribute or publish
@@ -10,6 +29,7 @@
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
 # Student side autograding was added by Brad Miller, Nick Hay, and
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
+
 
 
 from capture_agents import CaptureAgent
@@ -94,6 +114,7 @@ class Dummy_Agent(CaptureAgent):
     for opponent_index in self.opponent_indices:
       self.opponent_positions[opponent_index] = None
       self.opponent_previous_positions[opponent_index] = None
+    self.set_guard_mode()
 
   def update_defence_destination(self,game_state):
     if self.destination_reached(game_state, self.defence_destination):
@@ -263,7 +284,10 @@ class Dummy_Agent(CaptureAgent):
   def choose_action(self, game_state):
     self.next_behaviour_state(game_state)
     if self.behaviour_state == 'Guard':
-      return self.choose_guard_action(game_state)
+      if self.can_guard:
+        return self.choose_guard_action(game_state)
+      else:
+        return self.choose_offensive_action(game_state)
     elif self.behaviour_state == 'Defence':
       return self.choose_defensive_action(game_state)
     elif self.behaviour_state == 'Offence':
@@ -627,7 +651,11 @@ class Dummy_Agent(CaptureAgent):
 
 
 class Top(Dummy_Agent):
-# go top somehow
+# defender agent
+
+  def set_guard_mode(self):
+      self.can_guard = True
+
   def set_center(self,game_state):
     #get center of map and maxHeight
 
@@ -639,20 +667,24 @@ class Top(Dummy_Agent):
       x = x + offset
     y = game_state.get_walls().height/2
     y_max = game_state.get_walls().height
-    yCenter = int(round(y_max/4*3))
+    y_center = int(round(y_max/4*3))
     for i in range(0,y_max):
-      y_candidate = yCenter+i
+      y_candidate = y_center+i
       if y_candidate <= y_max and y_candidate > 0:
         if not game_state.has_wall(x,y_candidate):
           break
-      y_candidate = yCenter-i
+      y_candidate = y_center-i
       if y_candidate <= y_max and y_candidate > 0:
         if not  game_state.has_wall(x,y_candidate):
           break
     self.center = (x,y_candidate)
 
 class Bottom(Dummy_Agent):
-# go bottom somehow
+# attacker agent
+
+  def set_guard_mode(self):
+      self.can_guard = False
+
   def set_center(self,game_state):
     #get center of map and maxHeight
     x = int(game_state.get_walls().width/2)
@@ -663,13 +695,13 @@ class Bottom(Dummy_Agent):
       x = x + offset
     y = game_state.get_walls().height/2
     y_max = game_state.get_walls().height
-    yCenter = int(round(y_max/4))
+    y_center = int(round(y_max/4))
     for i in range(0,y_max):
-      y_candidate = yCenter+i
+      y_candidate = y_center+i
       if y_candidate <= y_max and y_candidate > 0:
         if not  game_state.has_wall(x,y_candidate):
           break
-      y_candidate = yCenter-i
+      y_candidate = y_center-i
       if y_candidate <= y_max and y_candidate > 0:
         if not  game_state.has_wall(x,y_candidate):
           break
